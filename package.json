@@ -17,5 +17,14 @@
   "bugs": {
     "url": "https://github.com/DucHung0711/BE-NodeJs/issues"
   },
-  "homepage": "https://github.com/DucHung0711/BE-NodeJs#readme"
+  "homepage": "https://github.com/DucHung0711/BE-NodeJs#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "compression": "^1.8.1",
+    "helmer": "^0.0.1",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.1"
+  }
 }
