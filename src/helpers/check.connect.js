@@ -14,7 +14,7 @@ const countConnect = () => {
 
 // check over load
 const checkOverload = () => {
-    setInterval( () => {
+    // setInterval( () => {
         const numConnection = mongoose.connections.length
         const numCores = os.cpus().length
         const memoryUsage = process.memoryUsage().rss
@@ -29,7 +29,7 @@ const checkOverload = () => {
             // notify.send(....)
         }
 
-    }, _SECONDS)// Monitor every 5 seconds
+    // }, _SECONDS) // Monitor every 5 seconds
 }
 
 module.exports = {
