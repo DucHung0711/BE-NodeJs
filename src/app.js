@@ -14,17 +14,33 @@ app.use(morgan("dev"))
 // morgan("tiny")
 app.use(helmet())
 app.use(compression())
+app.use(express.json())
+app.use(express.urlencoded({
+    extended: true
+}))
 // init db
 require('./dbs/init.mongodb')
-const { checkOverload } = require('./helpers/check.connect')
-checkOverload()
+// const { checkOverload } = require('./helpers/check.connect')
+// checkOverload()
 // init routes
-app.get('/', (req, res, next) => {
-    const strCompress = 'Hello compress'
-    return res.status(200).json({
-        message: 'Welcome node js'
+app.use('/', require('./routes'))
+
+// handling error
+app.use((req, res, next) => {
+    const error = new Error('Not Found')
+    error.status = 404
+    next(error)
+})
+
+app.use((error, req, res, next) => {
+    const statusCode = error.status || 500
+    console.error('DEBUG - Error middleware:', error)
+    return res.status(statusCode).json({
+        status: 'error',
+        code: statusCode,
+        stack: error.stack,
+        message: error.message || 'Internal Server Error'
     })
 })
-// handling error
 
 module.exports = app
