@@ -1,10 +1,10 @@
 'use strict'
 
-const { product, clothing, electronics, furniture} = require('../models/product.model')
+const { product, clothing, electronics, furniture } = require('../models/product.model')
 const { BadRequestError, ForbiddenError } = require('../core/error.response')
-const { findAllDraftsForShop, 
+const { findAllDraftsForShop,
     publishProductByShop,
-    unPublishProductByShop, 
+    unPublishProductByShop,
     findAllPublishForShop,
     searchProductsByUser,
     findAllProducts,
@@ -27,24 +27,24 @@ class ProductFactory {
         }
     */
 
-    static productRegistry = {} 
+    static productRegistry = {}
 
-    static resgisterProductType(type, classRef){
+    static resgisterProductType(type, classRef) {
         ProductFactory.productRegistry[type] = classRef
     }
 
     static async createProduct(type, payload) {
         if (!payload || typeof payload !== 'object') throw new BadRequestError('Missing payload')
         const productClass = ProductFactory.productRegistry[type]
-        if(!productClass) {
+        if (!productClass) {
             throw new BadRequestError(`Invalid product type ${type}`)
         }
         return new productClass(payload).createProduct()
-    }   
+    }
 
-    static async updateProduct(type, product_id , payload) {
+    static async updateProduct(type, product_id, payload) {
         const productClass = ProductFactory.productRegistry[type]
-        if(!productClass) {
+        if (!productClass) {
             throw new BadRequestError(`Invalid product type ${type}`)
         }
 
@@ -54,32 +54,32 @@ class ProductFactory {
     }
 
     // PUT
-    static async publishProductByShop({product_shop, product_id}){
-        return await publishProductByShop({product_shop, product_id})
+    static async publishProductByShop({ product_shop, product_id }) {
+        return await publishProductByShop({ product_shop, product_id })
     }
 
-    static async unPublishProductByShop({product_shop, product_id}){
-        return await unPublishProductByShop({product_shop, product_id})
+    static async unPublishProductByShop({ product_shop, product_id }) {
+        return await unPublishProductByShop({ product_shop, product_id })
     }
     // END PUT
 
     // query
-    static async findAllDraftsForShop({product_shop, limit = 50, skip = 0}) {
+    static async findAllDraftsForShop({ product_shop, limit = 50, skip = 0 }) {
         const query = { product_shop, isDraft: true }
-        return await findAllDraftsForShop({query, limit, skip})
+        return await findAllDraftsForShop({ query, limit, skip })
     }
 
-    static async findAllPublishForShop({product_shop, limit = 50, skip = 0}) {
+    static async findAllPublishForShop({ product_shop, limit = 50, skip = 0 }) {
         const query = { product_shop, isPublished: true }
-        return await findAllPublishForShop({query, limit, skip})
+        return await findAllPublishForShop({ query, limit, skip })
     }
 
-    static async getListSearchProduct({keySearch}) {
+    static async getListSearchProduct({ keySearch }) {
         return await searchProductsByUser({ keySearch })
     }
 
-    static async findAllProducts( {limit = 50, sort = 'ctime', page = 1, filter = {isPublished: true} } ) {
-        return await findAllProducts({ limit, sort, page, filter, select: ['product_name', 'product_price', 'product_thumb'] })
+    static async findAllProducts({ limit = 50, sort = 'ctime', page = 1, filter = { isPublished: true } }) {
+        return await findAllProducts({ limit, sort, page, filter, select: ['product_name', 'product_price', 'product_thumb', 'product_shop'] })
     }
 
     static async findProduct({ product_id }) {
@@ -106,8 +106,8 @@ class Product {
 
     // create new product
     async createProduct(product_id) {
-        const newProduct = await product.create({...this, _id: product_id})  // nếu product_id undefined thì mongoose sẽ tự tạo id mới
-        if(newProduct){
+        const newProduct = await product.create({ ...this, _id: product_id })  // nếu product_id undefined thì mongoose sẽ tự tạo id mới
+        if (newProduct) {
             // add product_stock in inventory collection
             insertInventory({
                 productId: newProduct._id,
@@ -125,8 +125,8 @@ class Product {
             productId,
             bodyUpdate: objectParams,
             model: product
-    })
-}
+        })
+    }
 }
 
 // define subclass for different product types Clothing
@@ -149,11 +149,12 @@ class Clothing extends Product {
         // Loại bỏ field undefined
         const objectParams = removeUndefinedObject(this)
         // Nếu có product_attributes thì update bảng con tương ứng (ví dụ clothing)
-        if(objectParams.product_attributes) {
+        if (objectParams.product_attributes) {
             await updateProductById({
                 productId,
                 bodyUpdate: updateNestedObjectParser(objectParams.product_attributes),
-                model: clothing})
+                model: clothing
+            })
         }
 
         // Update bảng cha product
@@ -161,7 +162,7 @@ class Clothing extends Product {
 
         return updateProduct;
     }
-}   
+}
 
 // define subclass for different product types Electronics
 class Electronics extends Product {
@@ -176,7 +177,7 @@ class Electronics extends Product {
 
         const newProduct = await super.createProduct(newElectronic._id)
         if (!newProduct) throw new BadRequestError('Create new product error')
-            
+
         return newProduct
     }
 }
@@ -194,7 +195,7 @@ class Furniture extends Product {
 
         const newProduct = await super.createProduct(newFurniture._id)
         if (!newProduct) throw new BadRequestError('Create new product error')
-            
+
         return newProduct
     }
 }
