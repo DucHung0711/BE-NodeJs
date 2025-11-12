@@ -1,0 +1,148 @@
+'use strict'
+
+const {
+    BadRequestError,
+    NotFoundError
+} = require('../core/error.response')
+const { findCartById } = require("../models/repositories/cart.repo")
+const { getDiscountAmount } = require('./discount.service')
+
+class CheckoutService {
+    /**
+        {
+            cartId,
+            userId,
+            shop_order_ids: [
+                {
+                    shopId,
+                    shop_discount: []
+                    item_products: [
+                        {
+                            productId,
+                            quantity,
+                            price
+                        }
+                    ]
+                },
+                {
+                    shopId,
+                    shop_discount: [
+                        {
+                            shopId'
+                            discountId,
+                            codeId
+                        }
+                    ]
+                    item_products: [
+                        {
+                            productId,
+                            quantity: 2,
+                            price: 1000
+                        }
+                    ]
+                }
+            ],
+        }
+     */
+    static async checkoutReview({
+        cartId,
+        userId,
+        shop_order_ids = []
+    }) {
+        // chgeck cart
+        const foundCart = await findCartById(cartId)
+        if (!foundCart) {
+            throw new BadRequestError('Cart not found!')
+        }
+
+        const checkout_order = {
+            totalProce: 0, // tong tien don hang
+            freeShip: 0, // phi van chuyen
+            totalDiscount: 0, // tong tien giam gia
+            totalCheckout: 0, // tong tien thanh toan
+        }, shop_order_ids_new = []
+
+        for (let i = 0; i < shop_order_ids.length; i++) {
+            const { shopId, shop_discount = [], item_products = [] } = shop_order_ids[i]
+            // check  product aviliable
+            const checkProductServer = await checkProductByServer(item_products)
+            if (!checkProductServer[0]) {
+                throw new BadRequestError('Product not found in shop order!')
+            }
+
+            // tong tien don hang cua shop
+            const checkouet_price = checkProductServer.reduce((acc, item_product) => {
+                return acc + (item_product.price * item_product.quantity)
+            }, 0)
+
+            // tong tien truov khi xu li
+            checkout_order.totalProce += checkouet_price
+
+            const item_checkOut = {
+                shopId,
+                shop_discount,
+                priceRaw: checkouet_price,
+                priceApplyDiscount: checkouet_price, // gia sau khi ap dung giam gia
+                item_products: checkProductServer
+            }
+
+            // neu shop_discount ton tai > 0, chekc co hop le hay khong
+            if (shop_discount.length > 0) {
+                // gia su co 1 discount
+                // get amount discount
+                const { totalPrice = 0, discount = 0 } = await getDiscountAmount({
+                    codeId,
+                    userId,
+                    shopId,
+                    products: checkProductServer
+                })
+
+                // tong cong discount giam gia
+                checkout_order.totalDiscount += discount
+
+                // gia sau khi ap dung giam gia
+                if (discount > 0) { // neu tien giam gia > 0 moi cap nhat
+                    item_checkOut.priceApplyDiscount = totalPrice
+                }
+            }
+
+            // tong thanh toan cuoi cung
+            checkout_order.totalCheckout += item_checkOut.priceApplyDiscount
+
+            // push vao mang moi
+            shop_order_ids_new.push(item_checkOut)
+
+            return {
+                shop_order_ids,
+                shop_order_ids_new,
+                checkout_order
+            }
+        }
+    }
+
+    // order
+    static async orderByUser({
+        shop_order_ids,
+        cartId,
+        userId,
+        user_address = {},
+        user_payment = {}
+    }) {
+        const { shop_order_ids_new, checkout_order } = await CheckoutService.checkoutReview({
+            cartId,
+            userId,
+            shop_order_ids
+        })
+
+        // check lai mot lan nua xem vuot ton kho hay khong
+        // get new array product
+        const product = shop_order_ids_new.flatMap(order => order.item_products)
+        console.log(`[1]: `, product)
+
+        for (let i = 0; i < product.length; i++) {
+            const { productId, quantity } = product[i]
+        }
+    }
+}
+
+modeule.exports = CheckoutService()
