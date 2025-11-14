@@ -129,8 +129,8 @@ const getProductWithAttributes = async ({ product_id, product_type }) => {
     };
 }
 
-const getProductById = async ({ productId }) => {
-    return await model.findOne({ _id: convertToObjectIdMongodb(productId) }).lean()
+const getProductById = async (productId) => {
+    return await product.findOne({ _id: convertToObjectIdMongodb(productId) }).lean()
 }
 
 const checkProductByServer = async (product) => {

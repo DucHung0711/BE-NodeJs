@@ -42,10 +42,10 @@ class CartService {
         const { productId, quantity } = product
         const query = {
             cart_userId: userId,
-            'cart_product.productId': productId,
+            'cart_products.productId': productId,
             cart_state: 'active'
         }, updateSet = {
-            $inc: { 'cart_product.$.quantity': quantity }
+            $inc: { 'cart_products.$.quantity': quantity }
         }, options = { upsert: true, new: true }
 
         const userCart = await cart.findOneAndUpdate(
@@ -94,7 +94,7 @@ class CartService {
             }
         ]
     */
-    static async addToCartV2({ userId, product = {} }) {
+    static async addToCartV2({ userId, shop_order_ids = {} }) {
         const { productId, quantity, old_quantity } = shop_order_ids[0]?.item_products[0]
 
         // check Product
@@ -120,7 +120,7 @@ class CartService {
         })
     }
 
-    static async deleteUserCart({ userId, productId }) {
+    static async deleteCartItem({ userId, productId }) {
         const query = { cart_userId: userId, cart_state: 'active' },
             updateSet = {
                 $pull: {
