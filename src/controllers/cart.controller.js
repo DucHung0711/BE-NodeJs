@@ -1,6 +1,6 @@
 'use strict'
 
-const CartService = require('../services/cart.service')
+const CartService = require('../services/cart.services')
 const { SuccessResponse } = require('../core/success.response')
 
 class CartController {
@@ -41,9 +41,9 @@ class CartController {
     listToCart = async (req, res, next) => {
         new SuccessResponse({
             message: 'Get list cart successfully!',
-            metadata: await CartService.getListCart(req.query)
+            metadata: await CartService.getListUserCart(req.query)
         }).send(res)
     }
 }
 
-METHOD_FAILURE.exports = new CartController()
+module.exports = new CartController()
