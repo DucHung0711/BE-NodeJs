@@ -5,6 +5,7 @@ const {
     NotFoundError
 } = require('../core/error.response')
 const { findCartById } = require("../models/repositories/cart.repo")
+const { checkProductByServer } = require('../models/repositories/product.repo')
 const { getDiscountAmount } = require('./discount.service')
 
 class CheckoutService {
@@ -63,7 +64,7 @@ class CheckoutService {
         }, shop_order_ids_new = []
 
         for (let i = 0; i < shop_order_ids.length; i++) {
-            const { shopId, shop_discount = [], item_products = [] } = shop_order_ids[i]
+            const { shopId, shop_discounts = [], item_products = [] } = shop_order_ids[i]
             // check  product aviliable
             const checkProductServer = await checkProductByServer(item_products)
             if (!checkProductServer[0]) {
@@ -72,7 +73,7 @@ class CheckoutService {
 
             // tong tien don hang cua shop
             const checkouet_price = checkProductServer.reduce((acc, item_product) => {
-                return acc + (item_product.price * item_product.quantity)
+                return acc + (item_product.quantity * item_product.price)
             }, 0)
 
             // tong tien truov khi xu li
@@ -80,18 +81,18 @@ class CheckoutService {
 
             const item_checkOut = {
                 shopId,
-                shop_discount,
+                shop_discounts,
                 priceRaw: checkouet_price,
                 priceApplyDiscount: checkouet_price, // gia sau khi ap dung giam gia
                 item_products: checkProductServer
             }
 
             // neu shop_discount ton tai > 0, chekc co hop le hay khong
-            if (shop_discount.length > 0) {
+            if (shop_discounts.length > 0) {
                 // gia su co 1 discount
                 // get amount discount
                 const { totalPrice = 0, discount = 0 } = await getDiscountAmount({
-                    codeId,
+                    codeId: shop_discounts[0].codeId,
                     userId,
                     shopId,
                     products: checkProductServer
@@ -102,7 +103,7 @@ class CheckoutService {
 
                 // gia sau khi ap dung giam gia
                 if (discount > 0) { // neu tien giam gia > 0 moi cap nhat
-                    item_checkOut.priceApplyDiscount = totalPrice
+                    item_checkOut.priceApplyDiscount = checkouet_price - discount
                 }
             }
 
@@ -145,4 +146,4 @@ class CheckoutService {
     }
 }
 
-modeule.exports = CheckoutService()
+module.exports = CheckoutService

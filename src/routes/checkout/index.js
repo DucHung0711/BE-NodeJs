@@ -7,6 +7,6 @@ const { asyncHandler } = require('../../helpers/asyncHandler')
 const { authenticationV2 } = require('../../auth/authUtils')
 
 // router.use(authenticationV2)
-router.post('/review', asyncHandler(checkoutController.checkoutReview))
+router.post('/review', asyncHandler(checkoutController.reviewCheckout))
 
 module.exports = router
