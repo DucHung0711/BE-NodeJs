@@ -192,20 +192,22 @@ class DiscountService {
             throw new NotFoundError('Discount code has been used up!')
         }
 
-        if (new Date() < new Date(discount_start_date) || new Date() > new Date(discount_end_date)) {
-            throw new NotFoundError('Discount code has expried!')
-        }
+        // if (new Date() < new Date(discount_start_date) || new Date() > new Date(discount_end_date)) {
+        //     throw new NotFoundError('Discount code has expried!')
+        // }
 
         // check xem cos gia tri toi thieu hay khong
         let totalOrder = 0
 
         if (discount_min_order_value > 0) {
             // get total
-            totalOrder = products.reduce((acc, item) => acc + (item.price * item.quantity), 0)
-        }
+            totalOrder = products.reduce((acc, item) => { 
+                return acc + (item.price * item.quantity)
+            }, 0)
 
-        if (totalOrder < discount_min_order_value) {
-            throw new NotFoundError(`Order must be at least ${discount_min_order_value} to apply this discount code!`)
+            if (totalOrder < discount_min_order_value) {
+                throw new NotFoundError(`Order must be at least ${discount_min_order_value} to apply this discount code!`)
+            }
         }
 
         if (discount_max_uses_per_user > 0) { // moi user chi dc su dung gioi han 1 lan
@@ -220,7 +222,7 @@ class DiscountService {
         // check xem discount nay la fiexed_amount hay percentage
         const amount = discount_type === 'fixed_amount'
             ? discount_value
-            : (totalOrder * discount_value) / 100
+            : totalOrder * (discount_value / 100)
 
         return {
             totalOrder,
