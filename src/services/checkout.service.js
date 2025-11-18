@@ -7,6 +7,8 @@ const {
 const { findCartById } = require("../models/repositories/cart.repo")
 const { checkProductByServer } = require('../models/repositories/product.repo')
 const { getDiscountAmount } = require('./discount.service')
+const { order } = require('../models/order.model')
+const { acquireLock, releaseLock } = require('./redis.service')
 
 class CheckoutService {
     /**
@@ -143,6 +145,54 @@ class CheckoutService {
         for (let i = 0; i < product.length; i++) {
             const { productId, quantity } = product[i]
         }
+    }
+
+    static async orderByUser({
+        shop_order_ids,
+        cartId,
+        userId,
+        user_address = {},
+        user_payment = {}
+    }) {
+        const { shop_order_ids_new, checkout_order } = await CheckoutService.checkoutReview({
+            cartId,
+            userId,
+            shop_order_ids
+        })
+
+        // check lai mot lan nua xem vuot ton kho hay khong
+        // get new array product
+        const products = shop_order_ids_new.flatMap(order => order.item_products)
+        console.log(`[1]: `, products)
+        const acquireProduct = []
+        for (let i = 0; i < product.length; i++) {
+            const { productId, quantity } = product[i]
+            const keyLock = await acquireLock(productId, quantity, cartId)
+            acquireProduct.push(keyLock ? true : false)
+            if (keyLock) {
+                await releaseLock(keyLock)
+            }
+        }
+
+        // check neu co san pham het hang trong kho
+        if (acquireProduct.includes(false)) {
+            throw new BadRequestError('Mot so san pham da duoc cap nhat, vui long kiem tra lai gio hang!')
+        }
+
+        const newOrder = await order.create({
+            order_userId: userId,
+            order_checkout: checkout_order,
+            order_shipping: user_address,
+            order_payment: user_payment,
+            order_products: shop_order_ids_new
+        })
+
+        // truong hop insert thanh cong
+        if (newOrder) {
+            
+        }
+
+        return newOrder
     }
 }
 
