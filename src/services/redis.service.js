@@ -2,10 +2,11 @@
 
 const redis = require('redis')
 const promisfly = require('util')
+const { reservationInventory } = require('../models/repositories/inventory.repo')
 const redisClient = redis.createClient()
 
-const pexpire = promisfly.promisify(redisClient.expire).bind(redisClient) // chuyen doi tu "func" -> "await func"
-const setnxAsync = promisfly.promisify(redisClient.setnx).bind(redisClient)
+const pexpire = promisfly(redisClient.expire).bind(redisClient) // chuyen doi tu "func" -> "await func"
+const setnxAsync = promisfly(redisClient.setnx).bind(redisClient)
 
 const acquireLock = async (productId, quantity, cartId) => {
     const key = `lock_v2023:${productId}`
@@ -15,11 +16,20 @@ const acquireLock = async (productId, quantity, cartId) => {
     for (let i = 0; i < retryTimes; i++) {
         // tao 1 key tren redis de khoa san pham, thang nao giu duoc thanh toan
         const result = await setnxAsync(key, retryTimes)
-        console.log(`[result]::`, result)
+        console.log(`[result]::`, result) // = 0 hoac 1
         if (result === 1) {
             // thao tac voi inventory
+            const isReversation = await reservationInventory({
+                productId,
+                quantity,
+                cartId
+            })
 
-            return key
+            if (isReversation.modifiedCount) {
+                await pexpire(key, expireTime) // dat thoi gian het han cho khoa
+                return key
+            }
+            return null
         } else {
             await new Promise((resolve) => setTimeout(resolve, 50)) // cho 50ms roi thu lai
         }
@@ -27,7 +37,7 @@ const acquireLock = async (productId, quantity, cartId) => {
 }
 
 const releaseLock = async keyLock => {
-    const delAsyncKey = promisify(redisClient.del).bind(redisClient)
+    const delAsyncKey = promisfly(redisClient.del).bind(redisClient)
     return await delAsyncKey(keyLock)
 }
 
