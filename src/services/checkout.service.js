@@ -194,6 +194,34 @@ class CheckoutService {
 
         return newOrder
     }
+
+    /*
+        1> Query order [Users]
+    */
+    static async getOrderByUserId() {
+
+    }
+
+    /*
+        1> Query order using id [Users]
+    */
+    static async getOneOrderByUserId() {
+
+    }
+
+    /*
+        1> Cancel order [Users]
+    */
+    static async cancelOrderByUserId() {
+
+    }
+
+    /*
+        1> Update order status [Shop | Admin]
+    */
+    static async updateOrderStatusByShop() {
+
+    }
 }
 
 module.exports = CheckoutService
