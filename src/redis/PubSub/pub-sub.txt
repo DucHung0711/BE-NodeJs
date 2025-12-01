@@ -1,0 +1,13 @@
+
+SUBSCRIBE hungnd            |PUBLISH hungnd "new video"
+-> "subscribe"              |-> (integer) 1
+-> "hungnd"                 |PUBLISH hungnd "new video for members"
+-> (integer) 1              |-> (integer) 1
+                            |
+-> "message"                |
+-> "hungnd"                 |
+-> "new video"              |
+                            |
+-> "message"                |
+-> "hungnd"                 |
+-> "new video for members"  |
