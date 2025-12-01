@@ -96,6 +96,51 @@ class CommentService {
 
         return comments
     }
+
+    static async deleteComment({
+        commentId,
+        productId
+    }) {
+        // check product exist in database
+        const foundProduct = await Product.findById(convertToObjectIdMongodb(productId))
+        if (!foundProduct) {
+            throw new NotFoundError('Product not found')
+        }
+        // 1. xac vi tri left/right cua comment can xoa
+        const comment = await Comment.findById(convertToObjectIdMongodb(commentId))
+        if (!comment) {
+            throw new NotFoundError('Comment not found')
+        }
+
+        const leftValue = comment.comment_left
+        const rightValue = comment.comment_right
+
+        // 2. tinh width
+        const width = rightValue - leftValue + 1
+
+        // 3. xoa comment va cac comment con cua no
+        await Comment.deleteMany({
+            comment_productId: convertToObjectIdMongodb(productId),
+            comment_left: { $gte: leftValue, $lte: rightValue }
+        })
+
+        // 4. cap nhat lai left/right cua cac comment con lai
+        await Comment.updateMany({
+            comment_productId: convertToObjectIdMongodb(productId),
+            comment_right: { $gt: rightValue }
+        }, {
+            $inc: { comment_right: -width }
+        })
+
+        await Comment.updateMany({
+            comment_productId: convertToObjectIdMongodb(productId),
+            comment_left: { $gt: rightValue }
+        }, {
+            $inc: { comment_left: -width }
+        })
+
+        return true
+    }
 }
 
 module.exports = CommentService
