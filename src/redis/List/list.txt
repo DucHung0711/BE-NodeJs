@@ -1,0 +1,35 @@
+
+LPUSH list: 01 a b c -> (integer) 3 // them 3 phan tu vao list
+LRANGE list:01 0 -1 -> "c" "b" "a" // lay toan bo phan tu trong list
+RPUSH list:01 1 2 3 -> (integer) 6
+LRANGE list:01 0 -1 -> "c" "b" "a" "1" "2" "3"
+LPOP list:01 -> "c" // xoa 1 phan tu dau tien list
+LRANGE list:01 0 -1 -> "b" "a" "1" "2" "3"
+LPOP list:01 2 -> "b" "a"
+LRANGE list:01 0 -1 -> "1" "2" "3"
+RPOP list:01 -> "3" // xoa 1 phan tu cuoi cung list
+
+LPUSH list: 01 a b c 1 2 3 -> (integer) 6
+LRANGE list:01 0 3 -> "c" "b" "a" "1" // lay phan tu co index 0 -> 3 trong list
+
+// vi du
+LPUSH l:ticket ticket:01 -> (integer) 1
+LRANGE l:ticket 0 -1 -> "ticket:01"
+BLPOP l:ticket 0 -> "l:ticket" "ticket:01" // xoa 1 phan tu trong list va block cho den khi thuc hien xoa xong thi tai nguyen khac moi duoc su dung list
+LRANGE l:ticket 0 -1 -> (emty array)
+
+LPUSH top 1 2 3 4 5 6 7 8 -> (integer) 8
+LINDEX top 2 -> "6" // lay phan tu o vi tri index = 2
+LLEN top -> (integer) 8 // lay tong so phan tu trong list
+LREM top 1 7 -> (integer) 1 // xoa phan tu o vi tri index 1 va gia la 7
+LRANGE top 0 -1 -> "8" "6" "5" "4" "3" "2" "1"
+LTRIM top 1 4 -> ok // xoa va giu lai cac phan tu index tu 1 -> 4
+LRANGE top 0 -1 -> "6" "5" "4" "3"
+
+EXIST top -> (integer) 1 // kiem tra list co ton tai hay khong
+LSET top 0 9 -> oke // sua gia tri = 9 cho phan tu co index = 0
+LRANGE top 0 -1 -> "9" "5" "4" "3"
+LINSERT top BEFORE 5 7 -> (integer) 5 // chen them phan tu 7 vao truoc gia tri 5
+LRANGE top 0 -1 -> "9" "7" "5" "4" "3"
+LINSERT top AFTER 5 6 -> (integer) 5 // chen them phan tu 6 vao sau gia tri 5
+LRANGE top 0 -1 -> "9" "7" "5" "6" "4" "3"

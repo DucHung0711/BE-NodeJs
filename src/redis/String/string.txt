@@ -1,0 +1,45 @@
+/*
+    ------String Redis-------
+    1. embstring (<= 44 bytes)
+    1. raw (> 44 bytes)
+    1. int (integer)
+*/
+
+SET str 12345678901234567890123456789acbd -> ok // gan gia tri cho str
+object encoding str -> "embstr"
+SET str2 abc12345678901234567890123456789acbd -> ok // gan gia tri cho str2
+object encoding str2 -> "raw"
+
+SET num 123 -> ok // gan gia tri cho num
+object encoding num -> "int"
+SET name Hung -> ok
+GET name -> "Hung"
+EXISTS name -> (integer) 1 // check name co ton tai khong? (1: yes, 2: no)
+STRLEN name -> (integer) 4 // lay so ky tu cua chuoi
+object encoding name -> "embstr"
+DEL name // xoa gia tri name
+
+MSET key1 value1 key2 value2 -> 0k // set nhieu gia tri
+MGET key1 key2 -> "value1" "value2" // get nhieu gia tri
+
+SET 0001:like 0 -> ok // set gia tri cho 0001:like
+INCR 0001:like -> (interger) 1 // tang 1 gia tri cho 0001:like
+DECR 0001:like // tru 1 gia tri cho 0001:like
+INCRBY 0001:like 8 // tang 8 gia tri cho 0001:like
+DECRBY 0001:loke 5 // giam 5 gia tri cho 0001:like
+
+KEYS '0001:*' // tim kiem cac key co ten '0001:*'
+EXPRIRE name 60 // set thoi gian het han 60s cho key name
+TTL name // kiem tra thoi gian het han cua key name
+
+SETNX key value1 -> (integer) 1 // set neu key co ton tai (1: yes, 2: no)
+
+// 2 cach de luu tru cache su dung String
+SET uesr:1 '{"name": "Hung", "age": 39}' -> ok // luu ten:id
+Get user:1 -> "{\"name\": \"Hung\", \"age\": 39}"
+
+MSET user:1:name Hung user:1:age 39
+MGET user:1:name user:1:age -> "Hung" "39"
+//
+
+SET lock_key unique_value NX PX 10000 // lock_key: khoa chinh, unique_value: ma dinh danh duy nhat, NX: thiet lap khong ton tai, PX: time het han cua lock_key

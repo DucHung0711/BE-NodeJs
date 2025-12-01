@@ -1,0 +1,56 @@
+
+MULTI -> ok // mo 1 giao dich
+set k1 v1 -> QUEUED // them 1 lenh vao giao dich
+set k2 v2 -> QUEUED
+get k1 -> QUEUED
+set k3 v3 -> QUEUED
+EXEC -> OK OK "v1" OK // thuc thi 1 giao dich
+
+get k3 -> "v3"
+
+MULTI -> OK
+set k1 v1 -> QUEUED
+set cr7 5 -> QUEUED
+set k2 v22 -> QUEUED
+DISCARD
+
+get k2 -> "v2"
+
+MULTI -> OK
+set k1 v1 -> QUEUED
+set k2 v2 -> QUEUED
+set k3 v3 -> QUEUED
+gett k3 -> ERR unknown command 'gett', with args beginning with: 'k3'
+set k4 v4 -> QUEUED
+set k5 v5 -> QUEUED
+EXEC -> EXECABORT Transaction discard because of previous erroes.
+
+MULTI -> OK
+INCR k1 -> QUEUED
+SET k2 v2 -> QUEUED
+SET k3 v3 -> QUEUED
+GET k3 -> QUEUED
+EXEC
+-> (error) ERR value is not an integer or out of range
+-> OK
+-> OK
+-> "v3"
+
+// vi du
+WATCH balance:001 -> OK
+MULTI -> OK
+DECRBY balance:001 20 -> QUEUED
+INCRBY amount:001 20
+EXEC -> (integer) -20 (integer) 20
+
+SET balance:001 1000 -> OK
+WATCH balance:001 -> OK
+MULTI -> OK
+DECRBY balance:001 200 -> QUEUED | SET balance:001 1000000 -> OK
+EXEC -> (nil)
+
+=> khi "WATCH balance:001" va "MULTI" => dang co 1 Transaction dang dien ra ma dong thoi o noi khac co
+lenh "SET balance:001 1000000 -> OK" khong nam trong Transaction
+=> Transaction se bi huy va huy toan bo lenh trong Transaction => dan den "EXEC -> (nil)"
+
+GET balance:001 -> 1000000
