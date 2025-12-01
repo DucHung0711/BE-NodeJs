@@ -1,0 +1,16 @@
+
+ZADD pre:2023 89 manCity 84 arsenal 75 manu 71 new 67 liverpool // add phan tu vao zset
+ZREVRANGE pre:2023 0 -1 -> "manCity" "arsenal" "manu" "new" "liverpool"
+ZRANGE pre:2023 0 -1 -> "liverpool" "new" "manu" "arsenal" "manCity"
+ZADD pre:2023 60 tips // add 1 phan tu
+ZREM pre:2023 tips // remove 1 phan tu
+ZINCRBY pre:2023 30 tips -> "90" // +30 o gi tri tips
+ZRANGEBYSCORE pre:2023 75 90 -> "manu" "arsenal" "manCity" "tips" // lay cac gia tri co key tu 75 -> 90
+
+// vi du
+ZADD shopDEV 1234 product:1 123 product: 2 234 product:3 2367 product:4 432 product:5
+ZSCORE shopDEV product:5 -> "432" // lay gia tri key = 432 cua product:5
+ZREVRANGE shopDEV 0 2 -> "product:4" "product:1" "product:5"
+ZREVRANGE shopDEV 0 2 WITHSCORES -> "product:4" "2367" "product:1" "1234" "product:5" "432"
+ZREVRANGEBYSCORE shopDEV 400 3000 -> "product:5" "product:1" "product:4"
+ZREVRANGEBYSCORE shopDEV 400 3000 WITHSCORES -> "product:5" "432" "product:1" "1234" "product:4" "2367"

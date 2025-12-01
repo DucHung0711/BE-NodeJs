@@ -1,0 +1,12 @@
+
+SADD cr7 juve real manu -> (integer) 3 // add 3 phan tu vao set
+SMEMBERS cr7 -> "manu" "real" "juve" // lay ra toan bo phan tu trong set
+SREM cr7 manu -> (integer) 1 // xoa phan tu co gia gia tri "manu" trong set
+SCARD cr7 -> (integer) 2 // lay trong so phan tu trong set
+SISMEMBER cr7 juve -> (integer) 1 // kiem tra phan tru co trong set hay khong(1: yes, 2: no)
+SRANDMEMBER cr7 1 // chon ngau nhien 1 phan tu trong set
+SPOP cr7 1 // xoa ngau nhien 1 phan tu trong set
+SMOVE cr7 m10 real -> (integer) 1 // move 1 phan tu cua cr7 -> m10
+
+SINTER cr7 m10 // lay cac phan tu giong nhau cua hai set
+SDIFF cr7 m10 // lay cac phan tu cr7 khac voi m10

@@ -1,0 +1,25 @@
+
+HSET user:01 name Hung -> (integer) 1 // set 1 gia tri
+HSET user:01 name Hung age 39 //
+HGET user:01 name // get gia tri
+
+HMSET user:02 name Hung age 39 // set 2 gia tri
+HMGET user:02 name age -> "Hung" "39" // lay 2 gia tri
+HDEL user:01 age // xoa truong age
+HMGET user:02 name age -> "Hung" (nil)
+HLEN user:01 -> (integer) 2 // lay so luong truong trong key user01
+HGETALL user:01 -> "name" "Hung" "age" "39" // get toan bo key
+HEXISTS user:01 age -> (integer) 1 // check gia tri co ton tai hay khong
+HINCRYBY user:01 age 1 -> (integer) 40 // tang gia tri cho age cua user:01
+
+HGETALL user:01 -> "name" "Hung" "age" "40"
+HKEYS user:01 -> "name" "age" // get cac key
+HVALS user:01 -> "Hung" "40" // get cac value
+
+// vi du shopping cart
+HSET cart:01 product:01 1 // add product_id to cart_id
+HINCRYBY cart:01 product:01 1 // +1 product in cart_id
+HLEN cart:01 // get count product_id in cart
+HDEL cart:01 product:01 // delete product in cart
+HINCRYBY cart:01 product:01 1 product:02 1 // +1 value for product:01 and product:02
+HGETALL cart:01 -> "product:01" "1" "product:02" "1"
