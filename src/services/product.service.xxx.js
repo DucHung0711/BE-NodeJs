@@ -15,6 +15,7 @@ const { findAllDraftsForShop,
 
 const { removeUndefinedObject, updateNestedObjectParser } = require('../utils')
 const { insertInventory } = require('../models/repositories/inventory.repo')
+const { pushNotification } = require('./notification.service')
 
 // define Factory class to create product based on type
 class ProductFactory {
@@ -109,11 +110,23 @@ class Product {
         const newProduct = await product.create({ ...this, _id: product_id })  // nếu product_id undefined thì mongoose sẽ tự tạo id mới
         if (newProduct) {
             // add product_stock in inventory collection
-            insertInventory({
+            const invenData = await insertInventory({
                 productId: newProduct._id,
                 shopId: this.product_shop,
                 stock: this.product_quantity
             })
+
+            pushNotification({
+                type: 'SHOP-001',
+                senderId: 1,
+                receivedId: this.product_shop,
+                options: {
+                    product_name: this.product_name,
+                    shop_name: this.product_shop
+                }
+            }).then(rs => console.log(rs))
+                .catch(err => console.error('Push notification error: ', err))
+            console.log('Inven data: ', invenData)
         }
 
         return newProduct
