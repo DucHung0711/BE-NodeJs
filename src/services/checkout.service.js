@@ -9,6 +9,7 @@ const { checkProductByServer } = require('../models/repositories/product.repo')
 const { getDiscountAmount } = require('./discount.service')
 const { order } = require('../models/order.model')
 const { acquireLock, releaseLock } = require('./redis.service')
+// import { acquireLock, releaseLock } from './redis.service.js'
 
 class CheckoutService {
     /**
