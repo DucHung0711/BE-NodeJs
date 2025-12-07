@@ -19,5 +19,5 @@ const commentSchema = new Schema({
 })
 
 module.exports = {
-    discount: model(DOCUMENT_NAME, commentSchema)
+    comment: model(DOCUMENT_NAME, commentSchema)
 }
