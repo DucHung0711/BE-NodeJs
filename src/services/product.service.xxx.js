@@ -118,8 +118,8 @@ class Product {
 
             pushNotification({
                 type: 'SHOP-001',
-                senderId: 1,
-                receivedId: this.product_shop,
+                senderId: this.product_shop,
+                receivedId: 1,
                 options: {
                     product_name: this.product_name,
                     shop_name: this.product_shop

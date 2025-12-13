@@ -1,6 +1,6 @@
 'use strict'
 
-const { NOTI } = require('../models/notification.model')
+const NOTI = require('../models/notification.model')
 
 const pushNotification = async ({
     type = "",
@@ -21,16 +21,19 @@ const pushNotification = async ({
         noti_content = 'You have a new notification.'
     }
 
-    const newNoti = new NOTI({
-        noti_type: type,
-        noti_senderId: senderId,
-        noti_receivedId: receivedId,
-        noti_content,
-        noti_options: options
-    })
-
-    await newNoti.save()
-    return newNoti
+    try {
+        const newNoti = await NOTI.create({
+            noti_type: type,
+            noti_senderId: senderId,
+            noti_receivedId: receivedId,
+            noti_content,
+            noti_options: options
+        })
+        return newNoti
+    } catch (err) {
+        console.error('Failed to create notification:', err)
+        throw err
+    }
 }
 
 const listNotByUser = async ({
