@@ -1,6 +1,6 @@
 'use strict'
 
-const { product, clothing, electronics, furniture } = require('../../models/product.model')
+const { product, clothing, electronics, furniture } = require('../product.model')
 const { Types } = require('mongoose')
 const { getSelectData, unGetSelectData, convertToObjectIdMongodb } = require('../../utils')
 

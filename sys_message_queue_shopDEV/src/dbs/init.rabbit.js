@@ -45,7 +45,35 @@ const connectToRabbitMQForTest = async () => {
     }
 }
 
+const consumerQueue = async (channel, queueName) => {
+    try {
+        channel.assertQueue(queueName, { durable: true }) // durable: server will not delete queue when server restart
+        console.log('Waiting for messages....')
+        channel.consume(queueName, (msg) => {
+            let data
+            try {
+                // Try to parse as JSON first
+                data = JSON.parse(msg.content.toString())
+            } catch (error) {
+                // If not JSON, treat as plain text
+                data = msg.content.toString()
+            }
+            console.log(`Received message: ${queueName}`, data)
+            // 1. find User following taht Shop
+            // 2. send notification to User
+            // 3. yes, ok ===> success
+            // 4. error. setup DLX....
+        }, {
+            noAck: true // nhan roi thi k gui lai nua
+        })
+    } catch (error) {
+        console.error('Error connecting to RabbitMQ:', error)
+        throw error
+    }
+}
+
 module.exports = {
     connectToRabbitMQ,
-    connectToRabbitMQForTest
+    connectToRabbitMQForTest,
+    consumerQueue
 }
